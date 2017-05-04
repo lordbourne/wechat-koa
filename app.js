@@ -1,30 +1,18 @@
 'use strict';
 
-var Koa = require('koa');
-var path = require('path');
-var wechat = require('./wechat/g');
-var util = require('./libs/util');
+// 入口文件
+
+var Koa    = require('koa');
+var path   = require('path');
+var wechat = require('./wechat/g');// 中间件, 只处理和微信交互的部分，不处理业务逻辑
+var util   = require('./libs/util');
+var config = require('./config');
+var weixin = require('./weixin');
 var wechat_file = path.join(__dirname, './config/wechat.txt');
-
-var config = {
-  wechat: {
-    appID: 'wxa35db8e13ffe5d16',
-    appSecret: '24ba3a5eb9537f322f1b25fe6c244add',
-    token: 'weixin',
-    getAccessToken: function () {
-      return util.readFileAsync(wechat_file);
-    },
-    saveAccessToken: function (data) {
-      data = JSON.stringify(data);
-      return util.writeFileAsync(wechat_file, data);
-    }
-
-  }
-};
 
 var app = new Koa();
 
-app.use(wechat(config.wechat));
+app.use(wechat(config.wechat, weixin.reply));
 
 var port = '1234';
 app.listen(port);

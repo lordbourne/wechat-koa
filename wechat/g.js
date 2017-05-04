@@ -7,7 +7,7 @@ var getRawBody = require('raw-body');
 var Wechat = require('./wechat');
 var util = require('./util');
 
-module.exports = function (opts) {
+module.exports = function (opts, handler) {// 别忘了这个 handler 参数
   var wechat = new Wechat(opts);
 
   return function *(next) {
@@ -47,22 +47,22 @@ module.exports = function (opts) {
       var message = util.formatMessage(content.xml);
       console.log(message);
 
-      if (message.MsgType === 'event') {
-        if (message.Event === 'subscribe') {
-          var now = new Date().getTime();
-          that.status = 200;
-          that.type = 'application/xml';
-          that.body = '<xml>' +
-              '<ToUserName><![CDATA[' + message.FromUserName + ']]></ToUserName>' +
-              '<FromUserName><![CDATA[' + message.ToUserName + ']]></FromUserName>' +
-              '<CreateTime>' + now + '</CreateTime>' +
-              '<MsgType><![CDATA[text]]></MsgType>' +
-              '<Content><![CDATA[Hi, mooc]]></Content>' +
-              '</xml>';
+      // if (message.MsgType === 'event') {
+      //   if (message.Event === 'subscribe') {
+      //     var now = new Date().getTime();
+      //     that.status = 200;
+      //     that.type = 'application/xml';
+      //     that.body = xml;
 
-          return;
-        }
-      }
+      //     return;
+      //   }
+      // }
+      //
+      this.weixin = message;
+
+      yield handler.call(this, next);
+
+      wechat.reply.call(this);
 
     }
 
